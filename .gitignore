@@ -1,2 +1,5 @@
+# Build folders
+cmake-build-*/
+
 CMakeLists.txt.user
 .vscode/settings.json

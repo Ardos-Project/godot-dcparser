@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Unlicense
-
 cmake_minimum_required( VERSION 3.22 )
 
 message( STATUS "Using CMake ${CMAKE_VERSION}" )
@@ -27,7 +25,7 @@ if ( APPLE )
 endif()
 
 # Main project information
-project( GDExtensionTemplate
+project( GDDCParser
     LANGUAGES
         CXX
     VERSION
@@ -81,9 +79,6 @@ add_custom_command(
             "${CMAKE_SOURCE_DIR}/support_files"
             ${BUILD_OUTPUT_DIR}
 )
-
-# Warnings
-include( CompilerWarnings )
 
 # Create and include version info file from git
 include( GitVersionInfo )
