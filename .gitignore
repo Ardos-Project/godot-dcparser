@@ -1,5 +1,7 @@
 # Build folders
 cmake-build-*/
+project/addons/gddcparser/bin/*
+project/addons/gddcparser/icons/*
 
 CMakeLists.txt.user
 .vscode/settings.json

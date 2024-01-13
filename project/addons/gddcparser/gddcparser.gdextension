@@ -1,0 +1,15 @@
+[configuration]
+entry_symbol = "GDExtensionInit"
+compatibility_minimum = 4.2
+
+[libraries]
+macos.debug = "bin/libdcparser.Darwin.debug.framework"
+macos.release = "bin/libdcparser.Darwin.release.framework"
+windows.debug.x86_64 = "bin/libdcparser.Windows.AMD64.debug.dll"
+windows.release.x86_64 = "bin/libdcparser.Windows.AMD64.release.dll"
+linux.debug.x86_64 = "bin/libdcparser.Linux.x86_64.debug.so"
+linux.release.x86_64 = "bin/libdcparser.Linux.x86_64.release.so"
+linux.debug.arm64 = "bin/libdcparser.Linux.arm64.debug.so"
+linux.release.arm64 = "bin/libdcparser.Linux.arm64.release.so"
+linux.debug.rv64 = "bin/libdcparser.Linux.rv64.debug.so"
+linux.release.rv64 = "bin/libdcparser.Linux.rv64.release.so"

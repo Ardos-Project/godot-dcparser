@@ -1,5 +1,5 @@
-#pragma once
-// SPDX-License-Identifier: Unlicense
+#ifndef GDDCPARSER_GDDCPARSER_H
+#define GDDCPARSER_GDDCPARSER_H
 
 #include "godot_cpp/classes/object.hpp"
 
@@ -8,9 +8,9 @@ namespace godot
     class ClassDB;
 };
 
-class GDExtensionTemplate : public godot::Object
+class GDDCParser : public godot::Object
 {
-    GDCLASS( GDExtensionTemplate, godot::Object )
+    GDCLASS( GDDCParser, godot::Object)
 
 public:
     static godot::String version();
@@ -19,3 +19,5 @@ public:
 private:
     static void _bind_methods();
 };
+
+#endif // GDDCPARSER_GDDCPARSER_H

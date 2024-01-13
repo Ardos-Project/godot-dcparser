@@ -1,9 +1,9 @@
 target_sources( ${PROJECT_NAME}
     PRIVATE
-        Example.h
-        Example.cpp
-        GDExtensionTemplate.h
-        GDExtensionTemplate.cpp
+        GDDCParser.h
+        GDDCParser.cpp
+        GDDCFile.h
+        GDDCFile.cpp
         RegisterExtension.cpp
 )
 

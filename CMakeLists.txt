@@ -47,63 +47,39 @@ if ( APPLE )
     set( LIB_ARCH "universal" )
 endif()
 
-# LIB_DIR is where the actual library ends up. This is used in both the build directory and the
-# install directory and needs to be consistent with the paths in the gdextension file.
-#   e.g. linux.release.x86_64 = "lib/Linux-x86_64/libGDExtensionTemplate.so"
-set( LIB_DIR "lib/${CMAKE_SYSTEM_NAME}-${LIB_ARCH}" )
-
 message( STATUS "Building ${PROJECT_NAME} for ${LIB_ARCH} on ${CMAKE_SYSTEM_NAME}")
 
 # BUILD_OUTPUT_DIR is where we put the resulting library (in the build directory)
-set( BUILD_OUTPUT_DIR "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/" )
+set( BUILD_OUTPUT_DIR $<1:${PROJECT_SOURCE_DIR}/project/addons/gddcparser/bin/> )
 
 set_target_properties( ${PROJECT_NAME}
     PROPERTIES
         CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN true
-        RUNTIME_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}"
 )
 
-if( NOT DEFINED CMAKE_DEBUG_POSTFIX )
-    set_target_properties( ${PROJECT_NAME}
-        PROPERTIES
-            DEBUG_POSTFIX "-d"
-    )
-endif()
+set_target_properties( ${PROJECT_NAME}
+    PROPERTIES
+        OUTPUT_NAME "libdcparser.${CMAKE_SYSTEM_NAME}.${LIB_ARCH}"
+        DEBUG_POSTFIX ".debug"
+        RELEASE_POSTFIX ".release"
+)
+
 
 # Copy over additional files from the support_files directory
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/support_files"
-            ${BUILD_OUTPUT_DIR}
+            ${PROJECT_SOURCE_DIR}/project/addons/gddcparser/
 )
 
 # Create and include version info file from git
 include( GitVersionInfo )
 
 add_subdirectory( src )
-
-# Install library, extension file, and support files in ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}
-set( INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/" )
-
-message( STATUS "Install directory: ${INSTALL_DIR}")
-
-install( TARGETS ${PROJECT_NAME}
-    LIBRARY
-        DESTINATION ${INSTALL_DIR}/${LIB_DIR}
-    RUNTIME
-        DESTINATION ${INSTALL_DIR}/${LIB_DIR}
-)
-
-# Copy over support files
-install( DIRECTORY "${CMAKE_SOURCE_DIR}/support_files/"
-    DESTINATION ${INSTALL_DIR}
-    PATTERN ".*" EXCLUDE
-)
-
-add_subdirectory( templates )
 
 # ccache
 # Turns on ccache if found
