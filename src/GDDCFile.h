@@ -17,6 +17,8 @@ public:
     GDDCFile();
     ~GDDCFile();
 
+    void clear();
+
 private:
     static void _bind_methods();
 
