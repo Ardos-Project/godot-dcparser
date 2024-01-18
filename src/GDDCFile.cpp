@@ -1,6 +1,15 @@
 #include "GDDCFile.h"
 
-#include "godot_cpp/core/class_db.hpp"
+GDDCFile::GDDCFile()
+{
+    _dcFile = new DCFile();
+}
+
+GDDCFile::~GDDCFile()
+{
+    _dcFile->clear();
+    delete _dcFile;
+}
 
 /// Bind our methods so GDScript can access them.
 void GDDCFile::_bind_methods()

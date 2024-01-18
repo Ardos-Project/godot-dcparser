@@ -27,9 +27,9 @@ godot::String GDDCParser::godotCPPVersion()
 /// Bind our methods so GDScript can access them.
 void GDDCParser::_bind_methods()
 {
-    godot::ClassDB::bind_static_method( "GDExtensionTemplate", godot::D_METHOD( "version" ),
+    godot::ClassDB::bind_static_method( "GDDCParser", godot::D_METHOD( "version" ),
                                         &GDDCParser::version );
-    godot::ClassDB::bind_static_method( "GDExtensionTemplate",
+    godot::ClassDB::bind_static_method( "GDDCParser",
                                         godot::D_METHOD( "godot_cpp_version" ),
                                         &GDDCParser::godotCPPVersion );
 }

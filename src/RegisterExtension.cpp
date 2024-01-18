@@ -6,8 +6,8 @@
 #include "godot_cpp/core/defs.hpp"
 #include "godot_cpp/godot.hpp"
 
-#include "GDDCFile.h"
 #include "GDDCParser.h"
+#include "GDDCFile.h"
 
 /// @file
 /// Register our classes with Godot.

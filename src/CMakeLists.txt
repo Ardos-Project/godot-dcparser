@@ -14,4 +14,3 @@ target_include_directories( ${PROJECT_NAME}
 
 # Add dclass parser.
 add_subdirectory(dclass)
-include_directories(dclass)
