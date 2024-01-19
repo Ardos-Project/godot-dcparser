@@ -5,13 +5,17 @@
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/defs.hpp"
 #include "godot_cpp/godot.hpp"
+#include "godot_cpp/classes/resource_loader.hpp"
 
-#include "GDDCParser.h"
+#include "DCFileLoader.h"
+#include "DCFileResource.h"
 #include "GDDCFile.h"
+#include "GDDCParser.h"
+
+static godot::Ref<DCFileLoader> dc_file_loader;
 
 /// @file
 /// Register our classes with Godot.
-
 namespace
 {
     /// @brief Called by Godot to let us register our classes with Godot.
@@ -26,8 +30,14 @@ namespace
             return;
         }
 
+        godot::ClassDB::register_class<DCFileResource>();
+        godot::ClassDB::register_class<DCFileLoader>();
         godot::ClassDB::register_class<GDDCParser>();
         godot::ClassDB::register_class<GDDCFile>();
+
+        // Register the .dc file format.
+        dc_file_loader.instantiate();
+        godot::ResourceLoader::get_singleton()->add_resource_format_loader(dc_file_loader);
     }
 
     /// @brief Called by Godot to let us do any cleanup.
@@ -39,6 +49,10 @@ namespace
         {
             return;
         }
+
+        // Unregister the .dc file format.
+        godot::ResourceLoader::get_singleton()->remove_resource_format_loader(dc_file_loader);
+        dc_file_loader.unref();
     }
 }
 

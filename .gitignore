@@ -2,6 +2,7 @@
 cmake-build-*/
 project/addons/gddcparser/bin/*
 project/addons/gddcparser/icons/*
+project/.godot/*
 
 CMakeLists.txt.user
 .vscode/settings.json
