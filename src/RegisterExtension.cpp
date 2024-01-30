@@ -30,6 +30,8 @@ namespace
             return;
         }
 
+        godot::ClassDB::register_class<DCFileLoader>();
+
         // Register the .dc file format.
         dc_file_loader.instantiate();
         godot::ResourceLoader::get_singleton()->add_resource_format_loader( dc_file_loader );
