@@ -7,7 +7,6 @@
 
 class DCFileLoader : public godot::ResourceFormatLoader
 {
-    GDCLASS( DCFileLoader, ResourceFormatLoader )
 public:
     virtual godot::Ref<godot::Resource> load(
         const godot::String &p_path, const godot::String &p_original_path = "",
@@ -15,11 +14,8 @@ public:
         float *r_progress = nullptr,
         godot::ResourceLoader::CacheMode p_cache_mode = godot::ResourceLoader::CACHE_MODE_REUSE );
     virtual void get_recognized_extensions( godot::List<godot::String> *p_extensions ) const;
-    virtual bool handles_type( const godot::String &p_type ) const;
+    virtual bool handles_type( const godot::String &type ) const;
     virtual godot::String get_resource_type( const godot::String &p_path ) const;
-
-private:
-    static void _bind_methods();
 };
 
 #endif // GDDCPARSER_DCFILELOADER_H

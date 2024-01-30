@@ -22,6 +22,7 @@ Ref<Resource> DCFileLoader::load( const String &p_path, const String &p_original
     }
 
     Ref<DCFileResource> dcFile;
+    dcFile->set_name( p_path );
     dcFile->set_data( FileAccess::get_file_as_string( p_path ) );
 
     if ( r_error )
@@ -34,12 +35,12 @@ Ref<Resource> DCFileLoader::load( const String &p_path, const String &p_original
 
 void DCFileLoader::get_recognized_extensions( List<String> *p_extensions ) const
 {
-    p_extensions->push_back( "dc" );
+    p_extensions->push_front( "dc" );
 }
 
-bool DCFileLoader::handles_type( const String &p_type ) const
+bool DCFileLoader::handles_type( const String &type ) const
 {
-    return ( p_type == "DC" );
+    return type == "DC";
 }
 
 String DCFileLoader::get_resource_type( const String &p_path ) const
@@ -51,8 +52,4 @@ String DCFileLoader::get_resource_type( const String &p_path ) const
     }
 
     return "";
-}
-
-void DCFileLoader::_bind_methods()
-{
 }

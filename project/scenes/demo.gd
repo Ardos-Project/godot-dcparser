@@ -8,7 +8,9 @@ func _ready():
 	
 	# Create a new DCFile and read in the above data.
 	var dc_file = GDDCFile.new()
-	dc_file.read(dc_file_res)
+	
+	# TODO: Crashes (resource doesn't load above)
+	#dc_file.read(dc_file_res)
 	
 	# Print out some information about the DC file.
 	print(dc_file.get_num_classes())

@@ -1,19 +1,21 @@
 #ifndef GDDCPARSER_DCFILERESOURCE_H
 #define GDDCPARSER_DCFILERESOURCE_H
 
-#include "godot_cpp/classes/ref_counted.hpp"
+#include "godot_cpp/classes/resource.hpp"
 
 namespace godot
 {
     class ClassDB;
 }
 
-class DCFileResource : public godot::RefCounted
+class DCFileResource : public godot::Resource
 {
-    GDCLASS( DCFileResource, RefCounted )
+    GDCLASS( DCFileResource, Resource )
 public:
-    void set_data( const godot::String &data, const godot::String &name = "" );
+    void set_data( const godot::String &data );
     godot::String get_data();
+
+    void set_name( const godot::String &name );
     godot::String get_name();
 
 private:
