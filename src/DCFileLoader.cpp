@@ -15,8 +15,8 @@ Variant DCFileLoader::_load( const godot::String &p_path, const godot::String &o
     }
 
     DCFileResource *dcFile = memnew( DCFileResource );
-    dcFile->set_name( p_path );
-    dcFile->set_data( FileAccess::get_file_as_string( p_path ) );
+    dcFile->set_file_name( p_path );
+    dcFile->set_file_data( FileAccess::get_file_as_string( p_path ) );
 
     return { dcFile };
 }
