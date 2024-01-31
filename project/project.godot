@@ -11,5 +11,5 @@ config_version=5
 [application]
 
 config/name="DCParser Demo"
-run/main_scene="res://demo/scene.tscn"
+run/main_scene="res://scenes/demo.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")

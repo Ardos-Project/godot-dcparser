@@ -3,12 +3,8 @@
 
 #include "godot_cpp/classes/ref_counted.hpp"
 
+#include "DCFileResource.h"
 #include "dclass/dcFile.h"
-
-namespace godot
-{
-    class ClassDB;
-}
 
 class GDDCFile : public godot::RefCounted
 {
@@ -18,6 +14,10 @@ public:
     ~GDDCFile();
 
     void clear();
+
+    bool read( godot::Ref<DCFileResource> file ) const;
+
+    int get_num_classes() const;
 
 private:
     static void _bind_methods();
