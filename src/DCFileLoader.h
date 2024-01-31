@@ -13,7 +13,7 @@ public:
                           bool use_sub_threads, int32_t cache_mode ) const override;
     godot::PackedStringArray _get_recognized_extensions() const override;
     bool _handles_type( const godot::StringName &p_type ) const override;
-    godot::String _get_resource_type( const godot::String &p_path ) const;
+    godot::String _get_resource_type( const godot::String &p_path ) const override;
 
 protected:
     static void _bind_methods(){};

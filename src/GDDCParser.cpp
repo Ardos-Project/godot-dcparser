@@ -29,7 +29,6 @@ void GDDCParser::_bind_methods()
 {
     godot::ClassDB::bind_static_method( "GDDCParser", godot::D_METHOD( "version" ),
                                         &GDDCParser::version );
-    godot::ClassDB::bind_static_method( "GDDCParser",
-                                        godot::D_METHOD( "godot_cpp_version" ),
+    godot::ClassDB::bind_static_method( "GDDCParser", godot::D_METHOD( "godot_cpp_version" ),
                                         &GDDCParser::godotCPPVersion );
 }

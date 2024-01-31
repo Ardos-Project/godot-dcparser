@@ -11,14 +11,14 @@ Variant DCFileLoader::_load( const godot::String &p_path, const godot::String &o
 {
     if ( !FileAccess::file_exists( p_path ) )
     {
-        return Variant();
+        return {};
     }
 
     DCFileResource *dcFile = memnew( DCFileResource );
     dcFile->set_name( p_path );
     dcFile->set_data( FileAccess::get_file_as_string( p_path ) );
 
-    return Variant( dcFile );
+    return { dcFile };
 }
 
 PackedStringArray DCFileLoader::_get_recognized_extensions() const

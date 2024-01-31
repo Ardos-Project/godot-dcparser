@@ -10,13 +10,13 @@ namespace godot
 
 class DCFileResource : public godot::Resource
 {
-    GDCLASS( DCFileResource, Resource )
+    GDCLASS( DCFileResource, godot::Resource )
 public:
-    void set_data( const godot::String &data );
-    godot::String get_data();
+    void set_file_data( const godot::String &data );
+    godot::String get_file_data();
 
-    void set_name( const godot::String &name );
-    godot::String get_name();
+    void set_file_name( const godot::String &name );
+    godot::String get_file_name();
 
 private:
     static void _bind_methods();

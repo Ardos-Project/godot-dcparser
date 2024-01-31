@@ -20,8 +20,7 @@ void GDDCFile::clear()
 
 bool GDDCFile::read( Ref<DCFileResource> file ) const
 {
-    std::istringstream fileStream( file->get_data().utf8().get_data() );
-
+    std::istringstream fileStream( file->get_file_data().utf8().get_data() );
     return _dcFile->read( fileStream, file->get_name().utf8().get_data() );
 }
 
