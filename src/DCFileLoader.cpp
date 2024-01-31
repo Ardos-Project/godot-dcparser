@@ -6,44 +6,35 @@
 
 using namespace godot;
 
-Ref<Resource> DCFileLoader::load( const String &p_path, const String &p_original_path,
-                                  Error *r_error, bool p_use_sub_threads, float *r_progress,
-                                  ResourceLoader::CacheMode p_cache_mode )
+Variant DCFileLoader::_load( const godot::String &p_path, const godot::String &original_path,
+                             bool use_sub_threads, int32_t cache_mode ) const
 {
-    if ( r_error )
-    {
-        *r_error = ERR_FILE_CANT_OPEN;
-    }
-
     if ( !FileAccess::file_exists( p_path ) )
     {
-        *r_error = ERR_FILE_NOT_FOUND;
-        return Ref<Resource>();
+        return Variant();
     }
 
-    Ref<DCFileResource> dcFile;
+    DCFileResource *dcFile = memnew( DCFileResource );
     dcFile->set_name( p_path );
     dcFile->set_data( FileAccess::get_file_as_string( p_path ) );
 
-    if ( r_error )
-    {
-        *r_error = OK;
-    }
-
-    return dcFile;
+    return Variant( dcFile );
 }
 
-void DCFileLoader::get_recognized_extensions( List<String> *p_extensions ) const
+PackedStringArray DCFileLoader::_get_recognized_extensions() const
 {
-    p_extensions->push_front( "dc" );
+    PackedStringArray arr;
+    arr.push_back( "dc" );
+
+    return arr;
 }
 
-bool DCFileLoader::handles_type( const String &type ) const
+bool DCFileLoader::_handles_type( const godot::StringName &p_type ) const
 {
-    return type == "DC";
+    return p_type.match( "DC" );
 }
 
-String DCFileLoader::get_resource_type( const String &p_path ) const
+String DCFileLoader::_get_resource_type( const String &p_path ) const
 {
     String el = p_path.get_extension().to_lower();
     if ( el == "dc" )
