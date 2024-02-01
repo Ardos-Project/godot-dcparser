@@ -8,6 +8,8 @@ target_sources( ${PROJECT_NAME}
         DCFileLoader.cpp
         GDDCFile.h
         GDDCFile.cpp
+        GDDCClass.h
+        GDDCClass.cpp
         RegisterExtension.cpp
 )
 

@@ -38,6 +38,7 @@ namespace
 
         godot::ClassDB::register_class<DCFileResource>();
         godot::ClassDB::register_class<GDDCParser>();
+        godot::ClassDB::register_class<GDDCClass>();
         godot::ClassDB::register_class<GDDCFile>();
     }
 
