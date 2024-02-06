@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "godot_cpp/classes/ref_counted.hpp"
-#include "godot_cpp/templates/vector.hpp"
 
 // Max amount of data we can have is an uint16 (65k bytes)
 // -2 for the required prepended length tag.
@@ -27,7 +26,7 @@ public:
     void Clear();
 
     uint16_t Size() const;
-    godot::Vector<uint8_t> GetData() const;
+    godot::PackedByteArray GetData() const;
 
     void AddBool( const bool &v );
     void AddInt8( const int8_t &v );

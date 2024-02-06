@@ -37,14 +37,21 @@ uint16_t Datagram::Size() const
  * Returns the underlying data pointer for this datagram.
  * @return
  */
-Vector Datagram::GetData() const
+PackedByteArray Datagram::GetData() const
 {
-    Vector<uint8_t> retval;
-    retval.resize(_bufOffset);
-    uint8_t *w = retval.ptrw();
-    memcpy(w, _buf, _bufOffset);
+    // TODO: The return type should be a Vector<uint8_t>
+    // For some reason GDExtension won't wrap it...
 
-    return Variant(&retval);
+    //    Vector<uint8_t> retval;
+    //    retval.resize(_bufOffset);
+    //    uint8_t *w = retval.ptrw();
+    //    memcpy(w, _buf, _bufOffset);
+
+    // So instead we have to do this hacky thing.
+    std::string str( _buf, _buf + _bufOffset );
+    String retval( str.c_str() );
+
+    return retval.to_utf8_buffer();
 }
 
 /**
