@@ -20,6 +20,8 @@ void Datagram::SetData( godot::PackedByteArray data )
 
     // Copy the data from the byte array, skipping the length header.
     memcpy(_buf, w + sizeof(uint16_t), data.size() - sizeof(uint16_t));
+    // Set our buffer offset.
+    _bufOffset = data.size() - sizeof(uint16_t);
 }
 
 /**
