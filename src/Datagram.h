@@ -23,10 +23,13 @@ public:
     Datagram();
     ~Datagram();
 
+    void SetData(godot::PackedByteArray data);
+
     void Clear();
 
     uint16_t Size() const;
     godot::PackedByteArray GetData() const;
+    const uint8_t *GetBytes() const;
 
     void AddBool( const bool &v );
     void AddInt8( const int8_t &v );

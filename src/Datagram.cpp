@@ -13,6 +13,15 @@ Datagram::~Datagram()
     delete[] _buf;
 }
 
+void Datagram::SetData( godot::PackedByteArray data )
+{
+    EnsureLength(data.size());
+    const uint8_t *w = data.ptr();
+
+    // Copy the data from the byte array, skipping the length header.
+    memcpy(_buf, w + sizeof(uint16_t), data.size() - sizeof(uint16_t));
+}
+
 /**
  * Clears this datagram of data ready for rewriting.
  * Good for re-using datagrams rather than re-alloc.
@@ -50,6 +59,12 @@ PackedByteArray Datagram::GetData() const
 
     return arr;
 }
+
+/**
+ * Returns the underlying data pointer for this datagram.
+ * @return
+ */
+const uint8_t *Datagram::GetBytes() const { return _buf; }
 
 /**
  * Adds a boolean to this datagram.
@@ -239,6 +254,8 @@ void Datagram::EnsureLength( const size_t &length )
 
 void Datagram::_bind_methods()
 {
+    ClassDB::bind_method( D_METHOD("set_data"), &Datagram::SetData);
+
     ClassDB::bind_method( D_METHOD( "clear" ), &Datagram::Clear );
 
     ClassDB::bind_method( D_METHOD( "size" ), &Datagram::Size );
