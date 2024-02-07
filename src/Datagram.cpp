@@ -39,19 +39,16 @@ uint16_t Datagram::Size() const
  */
 PackedByteArray Datagram::GetData() const
 {
-    // TODO: The return type should be a Vector<uint8_t>
-    // For some reason GDExtension won't wrap it...
+    PackedByteArray arr;
+    arr.resize( sizeof( uint16_t ) + _bufOffset );
+    uint8_t *w = arr.ptrw();
 
-    //    Vector<uint8_t> retval;
-    //    retval.resize(_bufOffset);
-    //    uint8_t *w = retval.ptrw();
-    //    memcpy(w, _buf, _bufOffset);
+    // Datagram size tag.
+    memcpy( w, &_bufOffset, sizeof( uint16_t ) );
+    // Datagram data.
+    memcpy( w + sizeof( uint16_t ), _buf, _bufOffset );
 
-    // So instead we have to do this hacky thing.
-    std::string str( _buf, _buf + _bufOffset );
-    String retval( str.c_str() );
-
-    return retval.to_utf8_buffer();
+    return arr;
 }
 
 /**
