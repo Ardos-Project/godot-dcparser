@@ -11,6 +11,7 @@
 #include "DCFileResource.h"
 #include "Datagram.h"
 #include "DatagramIterator.h"
+#include "GDDCField.h"
 #include "GDDCFile.h"
 #include "GDDCParser.h"
 
@@ -47,6 +48,7 @@ namespace
         godot::ClassDB::register_class<DCFileResource>();
         godot::ClassDB::register_class<GDDCParser>();
         godot::ClassDB::register_class<GDDCClass>();
+        godot::ClassDB::register_class<GDDCField>();
         godot::ClassDB::register_class<GDDCFile>();
     }
 

@@ -10,6 +10,8 @@ target_sources( ${PROJECT_NAME}
         GDDCFile.cpp
         GDDCClass.h
         GDDCClass.cpp
+        GDDCField.h
+        GDDCField.cpp
         Datagram.h
         Datagram.cpp
         DatagramIterator.h

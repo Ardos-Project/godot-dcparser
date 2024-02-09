@@ -15,13 +15,23 @@ Datagram::~Datagram()
 
 void Datagram::SetData( godot::PackedByteArray data )
 {
-    EnsureLength(data.size());
+    EnsureLength( data.size() );
     const uint8_t *w = data.ptr();
 
     // Copy the data from the byte array, skipping the length header.
-    memcpy(_buf, w + sizeof(uint16_t), data.size() - sizeof(uint16_t));
+    memcpy( _buf, w + sizeof( uint16_t ), data.size() - sizeof( uint16_t ) );
     // Set our buffer offset.
-    _bufOffset = data.size() - sizeof(uint16_t);
+    _bufOffset = data.size() - sizeof( uint16_t );
+}
+
+void Datagram::SetBytes( const uint8_t *bytes, const size_t &len )
+{
+    EnsureLength( len );
+
+    // Copy data from the byte array.
+    memcpy( _buf, bytes, len );
+    // Set our buffer offset.
+    _bufOffset = len;
 }
 
 /**
@@ -66,7 +76,10 @@ PackedByteArray Datagram::GetData() const
  * Returns the underlying data pointer for this datagram.
  * @return
  */
-const uint8_t *Datagram::GetBytes() const { return _buf; }
+const uint8_t *Datagram::GetBytes() const
+{
+    return _buf;
+}
 
 /**
  * Adds a boolean to this datagram.
@@ -256,7 +269,7 @@ void Datagram::EnsureLength( const size_t &length )
 
 void Datagram::_bind_methods()
 {
-    ClassDB::bind_method( D_METHOD("set_data"), &Datagram::SetData);
+    ClassDB::bind_method( D_METHOD( "set_data" ), &Datagram::SetData );
 
     ClassDB::bind_method( D_METHOD( "clear" ), &Datagram::Clear );
 

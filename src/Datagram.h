@@ -23,7 +23,8 @@ public:
     Datagram();
     ~Datagram();
 
-    void SetData(godot::PackedByteArray data);
+    void SetData( godot::PackedByteArray data );
+    void SetBytes( const uint8_t *bytes, const size_t &len );
 
     void Clear();
 

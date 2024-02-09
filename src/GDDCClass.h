@@ -3,6 +3,7 @@
 
 #include "godot_cpp/classes/ref_counted.hpp"
 
+#include "Datagram.h"
 #include "dclass/dcClass.h"
 
 class GDDCClass : public godot::RefCounted
@@ -13,6 +14,9 @@ public:
 
     godot::String get_name() const;
     int get_number() const;
+
+    godot::Ref<Datagram> client_format_update( godot::String field_name, int do_id,
+                                               godot::Array args );
 
 private:
     static void _bind_methods();
