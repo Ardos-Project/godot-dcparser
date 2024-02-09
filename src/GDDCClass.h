@@ -17,6 +17,8 @@ public:
 
     godot::Ref<Datagram> client_format_update( godot::String field_name, int do_id,
                                                godot::Array args );
+    godot::Ref<Datagram> ai_format_update( godot::String field_name, int do_id, int to_id,
+                                           int from_id, godot::Array args );
 
 private:
     static void _bind_methods();

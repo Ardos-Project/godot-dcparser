@@ -36,9 +36,29 @@ godot::Ref<Datagram> GDDCClass::client_format_update( godot::String field_name, 
     }
 
     GDDCField dcField;
-    dcField.set_dc_field(field);
+    dcField.set_dc_field( field );
 
-    return dcField.client_format_update(do_id, std::move(args));
+    return dcField.client_format_update( do_id, std::move( args ) );
+}
+
+/**
+ * Generates a datagram containing the message necessary to send an update for
+ * the indicated distributed object from the AI.
+ */
+godot::Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int do_id, int to_id,
+                                                  int from_id, godot::Array args )
+{
+    DCField *field = _dcClass->get_field_by_name( field_name.utf8().get_data() );
+    if ( !field )
+    {
+        ERR_PRINT( ( "No field named " + field_name + "in class" + get_name() ).utf8().get_data() );
+        return {};
+    }
+
+    GDDCField dcField;
+    dcField.set_dc_field( field );
+
+    return dcField.ai_format_update( do_id, to_id, from_id, std::move( args ) );
 }
 
 /// Bind our methods so GDScript can access them.
@@ -49,4 +69,7 @@ void GDDCClass::_bind_methods()
 
     ClassDB::bind_method( D_METHOD( "client_format_update", "field_name", "do_id", "args" ),
                           &GDDCClass::client_format_update );
+    ClassDB::bind_method(
+        D_METHOD( "ai_format_update", "field_name", "do_id", "to_id", "from_id", "args" ),
+        &GDDCClass::ai_format_update );
 }

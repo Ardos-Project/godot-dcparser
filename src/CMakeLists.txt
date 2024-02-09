@@ -16,6 +16,8 @@ target_sources( ${PROJECT_NAME}
         Datagram.cpp
         DatagramIterator.h
         DatagramIterator.cpp
+        UniqueIdAllocator.h
+        UniqueIdAllocator.cpp
         RegisterExtension.cpp
 )
 

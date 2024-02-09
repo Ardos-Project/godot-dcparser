@@ -47,6 +47,35 @@ godot::Ref<Datagram> GDDCField::client_format_update( int do_id, godot::Array ar
     return dg;
 }
 
+/**
+ * Generates a datagram containing the message necessary to send an update for
+ * the indicated distributed object from the AI.
+ */
+godot::Ref<Datagram> GDDCField::ai_format_update( int do_id, int to_id, int from_id,
+                                                  godot::Array args )
+{
+    DCPacker packer;
+
+    packer.raw_pack_uint8( 1 );
+    packer.RAW_PACK_CHANNEL( to_id );
+    packer.RAW_PACK_CHANNEL( from_id );
+    packer.raw_pack_uint16( STATESERVER_OBJECT_SET_FIELD );
+    packer.raw_pack_uint32( do_id );
+    packer.raw_pack_uint16( get_number() );
+
+    packer.begin_pack( _dcField );
+    pack_args( packer, std::move( args ) );
+    if ( !packer.end_pack() )
+    {
+        return {};
+    }
+
+    Ref<Datagram> dg;
+    dg->SetBytes( reinterpret_cast<const uint8_t *>( packer.get_data() ), packer.get_length() );
+
+    return dg;
+}
+
 bool GDDCField::pack_args( DCPacker &packer, godot::Array args ) const
 {
     pack_object( packer, std::move( args ) );

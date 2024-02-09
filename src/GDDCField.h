@@ -16,6 +16,7 @@ public:
     int get_number() const;
 
     godot::Ref<Datagram> client_format_update( int do_id, godot::Array args );
+    godot::Ref<Datagram> ai_format_update( int do_id, int to_id, int from_id, godot::Array args );
 
     bool pack_args( DCPacker &packer, godot::Array args ) const;
 
