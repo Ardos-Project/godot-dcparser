@@ -14,6 +14,11 @@ void DatagramIterator::SetData( Ref<Datagram> dg )
     _offset = 0;
 }
 
+godot::Ref<Datagram> DatagramIterator::GetData()
+{
+    return _dg;
+}
+
 /**
  * Reads a boolean from the datagram.
  * @return
@@ -224,6 +229,7 @@ void DatagramIterator::EnsureLength( const size_t &length ) const
 void DatagramIterator::_bind_methods()
 {
     ClassDB::bind_method( D_METHOD( "set_data", "datagram" ), &DatagramIterator::SetData );
+    ClassDB::bind_method( D_METHOD( "get_data" ), &DatagramIterator::GetData );
 
     ClassDB::bind_method( D_METHOD( "get_bool" ), &DatagramIterator::GetBool );
     ClassDB::bind_method( D_METHOD( "get_int8" ), &DatagramIterator::GetInt8 );

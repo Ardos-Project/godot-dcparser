@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "dclass/dcPacker.h"
+
 #include "GDDCField.h"
 
 using namespace godot;
@@ -61,6 +63,45 @@ godot::Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int 
     return dcField.ai_format_update( do_id, to_id, from_id, std::move( args ) );
 }
 
+/**
+ * Extracts the update message out of the packer and packs the individual
+ * args into a Godot array to be used in a `Callable`.
+ */
+godot::Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
+{
+    DCPacker packer;
+
+    const char *data = (const char *)di->GetData()->GetBytes();
+    packer.set_unpack_data( data + di->Tell(), di->GetRemainingSize(), false );
+
+    int field_id = packer.raw_unpack_uint16();
+    DCField *field = _dcClass->get_field_by_index( field_id );
+    if ( field == nullptr )
+    {
+        ERR_PRINT( ( "Received update for field " + String( std::to_string( field_id ).c_str() ) +
+                     ", not in class " + get_name() )
+                       .utf8()
+                       .get_data() );
+        return {};
+    }
+
+    godot::Array updateData;
+
+    GDDCField dcField;
+    dcField.set_dc_field( field );
+
+    // First arg in receive_update data is the field name.
+    updateData.append( dcField.get_name() );
+
+    packer.begin_unpack( field );
+    dcField.receive_update( packer, updateData );
+    packer.end_unpack();
+
+    di->Skip( packer.get_num_unpacked_bytes() );
+
+    return updateData;
+}
+
 /// Bind our methods so GDScript can access them.
 void GDDCClass::_bind_methods()
 {
@@ -72,4 +113,6 @@ void GDDCClass::_bind_methods()
     ClassDB::bind_method(
         D_METHOD( "ai_format_update", "field_name", "do_id", "to_id", "from_id", "args" ),
         &GDDCClass::ai_format_update );
+
+    ClassDB::bind_method( D_METHOD( "receive_update", "di" ), &GDDCClass::receive_update );
 }

@@ -76,9 +76,33 @@ godot::Ref<Datagram> GDDCField::ai_format_update( int do_id, int to_id, int from
     return dg;
 }
 
+/**
+ * Extracts the update message out of the packer and packs the individual
+ * args into a Godot array to be used in a `Callable`.
+ */
+void GDDCField::receive_update( DCPacker &packer, godot::Array args ) const
+{
+    if ( _dcField->as_parameter() != nullptr )
+    {
+        // If it's a parameter-type field, just store a new value on the object.
+        unpack_args( packer, args );
+    }
+}
+
 bool GDDCField::pack_args( DCPacker &packer, godot::Array args ) const
 {
     pack_object( packer, std::move( args ) );
+    if ( !packer.had_error() )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool GDDCField::unpack_args( DCPacker &packer, godot::Array args ) const
+{
+    unpack_object( packer, std::move( args ) );
     if ( !packer.had_error() )
     {
         return true;
@@ -161,6 +185,126 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         }
         default:
             break;
+    }
+}
+
+void GDDCField::unpack_object( DCPacker &packer, godot::Array args ) const
+{
+    DCPackType pack_type = packer.get_pack_type();
+
+    switch ( pack_type )
+    {
+        case PT_invalid:
+            args.append( Variant() );
+            packer.unpack_skip();
+            break;
+
+        case PT_double:
+        {
+            double value = packer.unpack_double();
+            args.append( value );
+        }
+        break;
+
+        case PT_int:
+        {
+            int value = packer.unpack_int();
+            args.append( value );
+        }
+        break;
+
+        case PT_uint:
+        {
+            unsigned int value = packer.unpack_uint();
+            args.append( value );
+        }
+        break;
+
+        case PT_int64:
+        {
+            int64_t value = packer.unpack_int64();
+            args.append( value );
+        }
+        break;
+
+        case PT_uint64:
+        {
+            uint64_t value = packer.unpack_uint64();
+            args.append( value );
+        }
+        break;
+
+        case PT_blob:
+        {
+            // TODO: Needs to a bytes-like type here.
+            std::string str;
+            packer.unpack_string( str );
+            args.append( String( str.c_str() ) );
+        }
+        break;
+
+        case PT_string:
+        {
+            std::string str;
+            packer.unpack_string( str );
+            args.append( String( str.c_str() ) );
+        }
+        break;
+
+            // TODO.
+            //        case PT_class:
+            //        {
+            //            const DCClassParameter *class_param =
+            //            _this->get_current_field()->as_class_parameter(); if ( class_param !=
+            //            nullptr )
+            //            {
+            //                const DCClass *dclass = class_param->get_class();
+            //                if ( invoke_extension( dclass ).has_class_def() )
+            //                {
+            //                    // If we know what kind of class object this is and it has a valid
+            //                    // constructor, create the class object instead of just a tuple.
+            //                    object = unpack_class_object( dclass );
+            //                    if ( object == nullptr )
+            //                    {
+            //                        std::cerr << "Unable to construct object of class " <<
+            //                        dclass->get_name()
+            //                                  << "\n";
+            //                    }
+            //                    else
+            //                    {
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //        }
+            // Fall through (if no constructor)
+
+            // If we don't know what kind of class object it is, or it doesn't have a
+            // constructor, fall through and make a tuple.
+            //        default:
+            //        {
+            //            // First, build up a list from the nested objects.
+            //            object = PyList_New( 0 );
+            //
+            //            _this->push();
+            //            while ( _this->more_nested_fields() )
+            //            {
+            //                PyObject *element = unpack_object();
+            //                PyList_Append( object, element );
+            //                Py_DECREF( element );
+            //            }
+            //            _this->pop();
+            //
+            //            if ( pack_type != PT_array )
+            //            {
+            //                // For these other kinds of objects, we'll convert the list into a
+            //                // tuple.
+            //                PyObject *tuple = PyList_AsTuple( object );
+            //                Py_DECREF( object );
+            //                object = tuple;
+            //            }
+            //        }
+            //        break;
     }
 }
 

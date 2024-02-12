@@ -15,6 +15,7 @@ public:
     ~DatagramIterator();
 
     void SetData( godot::Ref<Datagram> dg );
+    godot::Ref<Datagram> GetData();
 
     bool GetBool();
     int8_t GetInt8();

@@ -237,6 +237,18 @@ void Datagram::AddLocation( const uint32_t &parentId, const uint32_t &zoneId )
     AddUint32( zoneId );
 }
 
+/**
+ * Adds a server control header to this datagram.
+ * @param parentId
+ * @param zoneId
+ */
+void Datagram::AddServerControlHeader( const uint16_t &code )
+{
+    AddInt8( 1 );
+    AddUint64( 1 ); // CONTROL_CHANNEL = 1
+    AddUint16( code );
+}
+
 void Datagram::EnsureLength( const size_t &length )
 {
     // Make sure we don't overflow.
@@ -297,4 +309,6 @@ void Datagram::_bind_methods()
 
     ClassDB::bind_method( D_METHOD( "add_location", "parent_id", "zone_id" ),
                           &Datagram::AddLocation );
+    ClassDB::bind_method( D_METHOD( "add_server_control_header", "code" ),
+                          &Datagram::AddServerControlHeader );
 }

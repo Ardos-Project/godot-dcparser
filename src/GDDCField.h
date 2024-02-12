@@ -18,12 +18,16 @@ public:
     godot::Ref<Datagram> client_format_update( int do_id, godot::Array args );
     godot::Ref<Datagram> ai_format_update( int do_id, int to_id, int from_id, godot::Array args );
 
+    void receive_update( DCPacker &packer, godot::Array args ) const;
+
     bool pack_args( DCPacker &packer, godot::Array args ) const;
+    bool unpack_args( DCPacker &packer, godot::Array args ) const;
 
 private:
     static void _bind_methods();
 
     void pack_object( DCPacker &packer, godot::Array args ) const;
+    void unpack_object( DCPacker &packer, godot::Array args ) const;
 
     DCField *_dcField;
 };
