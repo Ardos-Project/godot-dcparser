@@ -53,6 +53,7 @@ public:
 
     void AddLocation( const uint32_t &parentId, const uint32_t &zoneId );
     void AddServerControlHeader( const uint16_t &code );
+    void AddServerHeader( const uint64_t &channel, const uint64_t &sender, const uint16_t &code );
 
 private:
     static void _bind_methods();

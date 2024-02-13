@@ -249,6 +249,15 @@ void Datagram::AddServerControlHeader( const uint16_t &code )
     AddUint16( code );
 }
 
+void Datagram::AddServerHeader( const uint64_t &channel, const uint64_t &sender,
+                                const uint16_t &code )
+{
+    AddInt8( 1 );
+    AddUint64( channel );
+    AddUint64( sender );
+    AddUint16( code );
+}
+
 void Datagram::EnsureLength( const size_t &length )
 {
     // Make sure we don't overflow.
@@ -311,4 +320,6 @@ void Datagram::_bind_methods()
                           &Datagram::AddLocation );
     ClassDB::bind_method( D_METHOD( "add_server_control_header", "code" ),
                           &Datagram::AddServerControlHeader );
+    ClassDB::bind_method( D_METHOD( "add_server_header", "channel", "sender", "code" ),
+                          &Datagram::AddServerHeader );
 }
