@@ -2,7 +2,9 @@
 
 #include <utility>
 
+#include "dclass/dcAtomicField.h"
 #include "dclass/dcPacker.h"
+#include "dclass/dcmsgtypes.h"
 
 #include "GDDCField.h"
 
@@ -13,7 +15,7 @@ void GDDCClass::set_dc_class( DCClass *dcClass )
     _dcClass = dcClass;
 }
 
-godot::String GDDCClass::get_name() const
+String GDDCClass::get_name() const
 {
     return { _dcClass->get_name().c_str() };
 }
@@ -27,8 +29,8 @@ int GDDCClass::get_number() const
  * Generates a datagram containing the message necessary to send an update for
  * the indicated distributed object from the client.
  */
-godot::Ref<Datagram> GDDCClass::client_format_update( godot::String field_name, int do_id,
-                                                      godot::Array args )
+Ref<Datagram> GDDCClass::client_format_update( godot::String field_name, int do_id,
+                                               godot::Array args )
 {
     DCField *field = _dcClass->get_field_by_name( field_name.utf8().get_data() );
     if ( !field )
@@ -47,8 +49,8 @@ godot::Ref<Datagram> GDDCClass::client_format_update( godot::String field_name, 
  * Generates a datagram containing the message necessary to send an update for
  * the indicated distributed object from the AI.
  */
-godot::Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int do_id, int to_id,
-                                                  int from_id, godot::Array args )
+Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int do_id, int to_id,
+                                           int from_id, godot::Array args )
 {
     DCField *field = _dcClass->get_field_by_name( field_name.utf8().get_data() );
     if ( !field )
@@ -64,10 +66,93 @@ godot::Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int 
 }
 
 /**
+ * Generates a datagram containing the message necessary to generate a new
+ * distributed object from the AI. This requires querying the object for the
+ * initial value of its required fields.
+ *
+ * optional_fields is a list of fieldNames to generate in addition to the
+ * normal required fields.
+ */
+Ref<Datagram> GDDCClass::ai_format_generate( Object *dist_obj, uint32_t do_id, uint32_t parent_id,
+                                             uint32_t zone_id, uint64_t district_channel_id,
+                                             uint64_t from_channel_id )
+{
+    DCPacker packer;
+
+    packer.raw_pack_uint8( 1 );
+    packer.RAW_PACK_CHANNEL( district_channel_id );
+    packer.RAW_PACK_CHANNEL( from_channel_id );
+
+    // TODO: Optional fields.
+    bool has_optional_fields = false;
+    if ( has_optional_fields )
+    {
+        packer.raw_pack_uint16( STATESERVER_CREATE_OBJECT_WITH_REQUIRED_OTHER );
+    }
+    else
+    {
+        packer.raw_pack_uint16( STATESERVER_CREATE_OBJECT_WITH_REQUIRED );
+    }
+
+    packer.raw_pack_uint32( do_id );
+    // Parent is a bit overloaded; this parent is not about inheritance, this
+    // one is about the visibility container parent, i.e.  the zone parent:
+    packer.raw_pack_uint32( parent_id );
+    packer.raw_pack_uint32( zone_id );
+    packer.raw_pack_uint16( get_number() );
+
+    // Specify all the required fields.
+    int num_fields = _dcClass->get_num_inherited_fields();
+    for ( int i = 0; i < num_fields; ++i )
+    {
+        DCField *field = _dcClass->get_inherited_field( i );
+        if ( field->is_required() && field->as_molecular_field() == nullptr )
+        {
+            packer.begin_pack( field );
+            if ( !pack_required_field( packer, dist_obj, field ) )
+            {
+                return {};
+            }
+            packer.end_pack();
+        }
+    }
+
+    // Also specify the optional fields.
+    int num_optional_fields = 0;
+    packer.raw_pack_uint16( num_optional_fields );
+
+    //    for (int i = 0; i < num_optional_fields; i++) {
+    //        PyObject *py_field_name = PySequence_GetItem(optional_fields, i);
+    //        std::string field_name = PyUnicode_AsUTF8(py_field_name);
+    //        Py_XDECREF(py_field_name);
+    //
+    //        DCField *field = _this->get_field_by_name(field_name);
+    //        if (field == nullptr) {
+    //            std::ostringstream strm;
+    //            strm << "No field named " << field_name << " in class " << _this->get_name()
+    //                 << "\n";
+    //            nassert_raise(strm.str());
+    //            return Datagram();
+    //        }
+    //        packer.raw_pack_uint16(field->get_number());
+    //        packer.begin_pack(field);
+    //        if (!pack_required_field(packer, distobj, field)) {
+    //            return Datagram();
+    //        }
+    //        packer.end_pack();
+    //    }
+
+    Ref<Datagram> dg = memnew( Datagram );
+    dg->SetBytes( reinterpret_cast<const uint8_t *>( packer.get_data() ), packer.get_length() );
+
+    return dg;
+}
+
+/**
  * Extracts the update message out of the packer and packs the individual
  * args into a Godot array to be used in a `Callable`.
  */
-godot::Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
+Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
 {
     DCPacker packer;
 
@@ -102,6 +187,162 @@ godot::Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
     return updateData;
 }
 
+/**
+ * Looks up the current value of the indicated field by calling the
+ * appropriate get*() function, then packs that value into the packer.  This
+ * field is presumably either a required field or a specified optional field,
+ * and we are building up a datagram for the generate-with-required message.
+ *
+ * Returns true on success, false on failure.
+ */
+bool GDDCClass::pack_required_field( DCPacker &packer, godot::Object *dist_obj,
+                                     const DCField *field ) const
+{
+    const DCParameter *parameter = field->as_parameter();
+    if ( parameter != nullptr )
+    {
+        // This is the easy case: to pack a parameter, we just look on the class
+        // object for the data element.
+        std::string field_name = field->get_name();
+
+        Callable method( dist_obj, StringName( field_name.c_str() ) );
+
+        if ( !method.is_valid() )
+        {
+            // If the attribute is not defined, but the field has a default value
+            // specified, quietly pack the default value.
+            if ( field->has_default_value() )
+            {
+                packer.pack_default_value();
+                return true;
+            }
+
+            // If there is no default value specified, it's an error.
+            ERR_PRINT( ( "Data element " + String( field_name.c_str() ) +
+                         ", required by dc file for dclass " + get_name() +
+                         ", not defined on object" )
+                           .utf8()
+                           .get_data() );
+            return false;
+        }
+
+        Variant result = method.call();
+
+        Array arr;
+        arr.append( result );
+
+        // Now pack the value into the datagram.
+        GDDCField gdField;
+        gdField.set_dc_field( (DCField *)parameter );
+        bool pack_ok = gdField.pack_args( packer, arr );
+
+        return pack_ok;
+    }
+
+    if ( field->as_molecular_field() != nullptr )
+    {
+        ERR_PRINT( ( "Cannot pack molecular field " + String( field->get_name().c_str() ) )
+                       .utf8()
+                       .get_data() );
+        return false;
+    }
+
+    const DCAtomicField *atom = field->as_atomic_field();
+
+    // We need to get the initial value of this field.  There isn't a good,
+    // robust way to get this; presently, we just mangle the "setFoo()" name of
+    // the required field into "getFoo()" and call that.
+    std::string setter_name = atom->get_name();
+    if ( setter_name.empty() )
+    {
+        ERR_PRINT( "Required field is unnamed!" );
+        return false;
+    }
+
+    if ( atom->get_num_elements() == 0 )
+    {
+        // It sure doesn't make sense to have a required field with no parameters.
+        // What data, exactly, is required?
+        ERR_PRINT( ( "Required field " + String( setter_name.c_str() ) + " has no parameters!" )
+                       .utf8()
+                       .get_data() );
+        return false;
+    }
+
+    std::string getter_name = setter_name;
+    if ( setter_name.substr( 0, 3 ) == "set" )
+    {
+        // If the original method started with "set", we mangle this directly to
+        // "get".
+        getter_name[0] = 'g';
+    }
+    else
+    {
+        // Otherwise, we add a "get" prefix, and capitalize the next letter.
+        getter_name = "get" + setter_name;
+        getter_name[3] = toupper( getter_name[3] );
+    }
+
+    Callable method( dist_obj, StringName( getter_name.c_str() ) );
+
+    // Now we have to look up the getter on the distributed object and call it.
+    if ( !method.is_valid() )
+    {
+        // As above, if there's no getter but the field has a default value
+        // specified, quietly pack the default value.
+        if ( field->has_default_value() )
+        {
+            packer.pack_default_value();
+            return true;
+        }
+
+        // Otherwise, with no default value it's an error.
+        ERR_PRINT( ( "Distributed class " + get_name() + " doesn't have getter named " +
+                     String( getter_name.c_str() ) + " to match required field " +
+                     String( setter_name.c_str() ) )
+                       .utf8()
+                       .get_data() );
+        return false;
+    }
+
+    Variant result = method.call();
+    if ( result.get_type() == godot::Variant::NIL )
+    {
+        ERR_PRINT( ( "Error when calling " + String( getter_name.c_str() ) ).utf8().get_data() );
+        return false;
+    }
+
+    if ( atom->get_num_elements() == 1 )
+    {
+        // In this case, we expect the getter to return one object, which we wrap
+        // up in an array.
+        Array arr;
+        arr.append( result );
+
+        result = arr;
+    }
+    else
+    {
+        // Otherwise, it had better already be a sequence or tuple of some sort.
+        if ( result.get_type() != godot::Variant::ARRAY )
+        {
+            ERR_PRINT( ( "Since dclass " + get_name() + " method " + String( setter_name.c_str() ) +
+                         " is declared to have multiple parameters, GDScript function " +
+                         String( getter_name.c_str() ) + " must return an array." )
+                           .utf8()
+                           .get_data() );
+            return false;
+        }
+    }
+
+    // Now pack the arguments into the datagram.
+    GDDCField gdField;
+    gdField.set_dc_field( (DCField *)parameter );
+    bool pack_ok = gdField.pack_args( packer, result );
+
+    return pack_ok;
+}
+
 /// Bind our methods so GDScript can access them.
 void GDDCClass::_bind_methods()
 {
@@ -113,6 +354,9 @@ void GDDCClass::_bind_methods()
     ClassDB::bind_method(
         D_METHOD( "ai_format_update", "field_name", "do_id", "to_id", "from_id", "args" ),
         &GDDCClass::ai_format_update );
+    ClassDB::bind_method( D_METHOD( "ai_format_generate", "dist_obj", "do_id", "parent_id",
+                                    "zone_id", "district_channel_id", "from_channel_id" ),
+                          &GDDCClass::ai_format_generate );
 
     ClassDB::bind_method( D_METHOD( "receive_update", "di" ), &GDDCClass::receive_update );
 }

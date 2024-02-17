@@ -35,7 +35,7 @@ Ref<Datagram> GDDCField::client_format_update( int do_id, godot::Array args )
     packer.raw_pack_uint16( get_number() );
 
     packer.begin_pack( _dcField );
-    pack_args( packer, args );
+    pack_args( packer, std::move( args ) );
     if ( !packer.end_pack() )
     {
         return {};
@@ -84,12 +84,12 @@ void GDDCField::receive_update( DCPacker &packer, godot::Array args ) const
     // Unpack the arguments.
     // This *may* result in a recursive call-chain while it unpacks data
     // (if it's a more complex field type.)
-    unpack_args( packer, args );
+    unpack_args( packer, std::move( args ) );
 }
 
 bool GDDCField::pack_args( DCPacker &packer, godot::Array args ) const
 {
-    pack_object( packer, args );
+    pack_object( packer, std::move( args ) );
     if ( !packer.had_error() )
     {
         return true;
