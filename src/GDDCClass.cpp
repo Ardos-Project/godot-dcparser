@@ -278,9 +278,8 @@ bool GDDCClass::pack_required_field( DCPacker &packer, godot::Object *dist_obj,
     }
     else
     {
-        // Otherwise, we add a "get" prefix, and capitalize the next letter.
-        getter_name = "get" + setter_name;
-        getter_name[3] = toupper( getter_name[3] );
+        // Otherwise, we add a "get_" prefix.
+        getter_name = "get_" + setter_name;
     }
 
     Callable method( dist_obj, StringName( getter_name.c_str() ) );
