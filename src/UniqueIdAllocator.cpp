@@ -202,6 +202,6 @@ void UniqueIdAllocator::_bind_methods()
 
     ClassDB::bind_method( D_METHOD( "is_allocated", "id" ), &UniqueIdAllocator::is_allocated );
 
-    ClassDB::bind_method( D_METHOD( "free", "id" ), &UniqueIdAllocator::free_id );
+    ClassDB::bind_method( D_METHOD( "free_id", "id" ), &UniqueIdAllocator::free_id );
     ClassDB::bind_method( D_METHOD( "fraction_used" ), &UniqueIdAllocator::fraction_used );
 }
