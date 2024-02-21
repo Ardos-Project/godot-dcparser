@@ -23,8 +23,8 @@ public:
                                            int from_id, godot::Array args );
     godot::Ref<Datagram> ai_format_generate( godot::Object *dist_obj, uint32_t do_id,
                                              uint32_t parent_id, uint32_t zone_id,
-                                             uint64_t district_channel_id,
-                                             uint64_t from_channel_id );
+                                             uint64_t district_channel_id, uint64_t from_channel_id,
+                                             godot::PackedStringArray optional_fields );
 
     godot::Array receive_update( godot::Ref<DatagramIterator> di );
 

@@ -75,7 +75,8 @@ Ref<Datagram> GDDCClass::ai_format_update( godot::String field_name, int do_id, 
  */
 Ref<Datagram> GDDCClass::ai_format_generate( Object *dist_obj, uint32_t do_id, uint32_t parent_id,
                                              uint32_t zone_id, uint64_t district_channel_id,
-                                             uint64_t from_channel_id )
+                                             uint64_t from_channel_id,
+                                             PackedStringArray optional_fields )
 {
     DCPacker packer;
 
@@ -83,8 +84,7 @@ Ref<Datagram> GDDCClass::ai_format_generate( Object *dist_obj, uint32_t do_id, u
     packer.RAW_PACK_CHANNEL( district_channel_id );
     packer.RAW_PACK_CHANNEL( from_channel_id );
 
-    // TODO: Optional fields.
-    bool has_optional_fields = false;
+    bool has_optional_fields = !optional_fields.is_empty();
     if ( has_optional_fields )
     {
         packer.raw_pack_uint16( STATESERVER_CREATE_OBJECT_WITH_REQUIRED_OTHER );
@@ -118,29 +118,29 @@ Ref<Datagram> GDDCClass::ai_format_generate( Object *dist_obj, uint32_t do_id, u
     }
 
     // Also specify the optional fields.
-    int num_optional_fields = 0;
+    int64_t num_optional_fields = optional_fields.size();
     packer.raw_pack_uint16( num_optional_fields );
 
-    //    for (int i = 0; i < num_optional_fields; i++) {
-    //        PyObject *py_field_name = PySequence_GetItem(optional_fields, i);
-    //        std::string field_name = PyUnicode_AsUTF8(py_field_name);
-    //        Py_XDECREF(py_field_name);
-    //
-    //        DCField *field = _this->get_field_by_name(field_name);
-    //        if (field == nullptr) {
-    //            std::ostringstream strm;
-    //            strm << "No field named " << field_name << " in class " << _this->get_name()
-    //                 << "\n";
-    //            nassert_raise(strm.str());
-    //            return Datagram();
-    //        }
-    //        packer.raw_pack_uint16(field->get_number());
-    //        packer.begin_pack(field);
-    //        if (!pack_required_field(packer, distobj, field)) {
-    //            return Datagram();
-    //        }
-    //        packer.end_pack();
-    //    }
+    for ( int i = 0; i < num_optional_fields; i++ )
+    {
+        String field_name = optional_fields[i];
+
+        DCField *field = _dcClass->get_field_by_name( field_name.utf8().get_data() );
+        if ( field == nullptr )
+        {
+            ERR_PRINT(
+                ( "No field named " + field_name + "in class" + get_name() ).utf8().get_data() );
+            return {};
+        }
+
+        packer.raw_pack_uint16( field->get_number() );
+        packer.begin_pack( field );
+        if ( !pack_required_field( packer, dist_obj, field ) )
+        {
+            return {};
+        }
+        packer.end_pack();
+    }
 
     Ref<Datagram> dg = memnew( Datagram );
     dg->SetBytes( reinterpret_cast<const uint8_t *>( packer.get_data() ), packer.get_length() );
@@ -354,7 +354,8 @@ void GDDCClass::_bind_methods()
         D_METHOD( "ai_format_update", "field_name", "do_id", "to_id", "from_id", "args" ),
         &GDDCClass::ai_format_update );
     ClassDB::bind_method( D_METHOD( "ai_format_generate", "dist_obj", "do_id", "parent_id",
-                                    "zone_id", "district_channel_id", "from_channel_id" ),
+                                    "zone_id", "district_channel_id", "from_channel_id",
+                                    "optional_fields" ),
                           &GDDCClass::ai_format_generate );
 
     ClassDB::bind_method( D_METHOD( "receive_update", "di" ), &GDDCClass::receive_update );
