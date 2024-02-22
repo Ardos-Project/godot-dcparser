@@ -76,15 +76,41 @@ Ref<Datagram> GDDCField::ai_format_update( int do_id, int to_id, int from_id, go
 }
 
 /**
- * Extracts the update message out of the packer and packs the individual
- * args into a Godot array to be used in a `Callable`.
+ * Extracts the update message out of the datagram and applies it to the
+ * indicated object by calling the appropriate method.
  */
-void GDDCField::receive_update( DCPacker &packer, godot::Array args ) const
+void GDDCField::receive_update( godot::Object *dist_obj, DCPacker &packer ) const
 {
-    // Unpack the arguments.
-    // This *may* result in a recursive call-chain while it unpacks data
-    // (if it's a more complex field type.)
-    unpack_args( packer, std::move( args ) );
+    Array args;
+
+    // Call the field on the distributed object.
+    if ( _dcField->as_parameter() != nullptr )
+    {
+        // If it's a parameter-type field, just store a new value on the object.
+        // TODO: I'm not sure if this is possible?
+        ERR_PRINT(
+            ( "Unable to set parameter-type fields for field " + get_name() ).utf8().get_data() );
+    }
+    else
+    {
+        // Otherwise, it must be an atomic or molecular field, so call the
+        // corresponding method.
+        Callable method( dist_obj, get_name() );
+
+        if ( !method.is_valid() )
+        {
+            // If there's no method to receive this message, don't bother
+            // unpacking it to a Python tuple--just skip past the message.
+            packer.unpack_skip();
+        }
+        else
+        {
+            // Otherwise, get an array from the args and call the Python
+            // method.
+            unpack_args( packer, args );
+            method.callv( args );
+        }
+    }
 }
 
 bool GDDCField::pack_args( DCPacker &packer, godot::Array args ) const

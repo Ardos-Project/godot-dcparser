@@ -26,7 +26,13 @@ public:
                                              uint64_t district_channel_id, uint64_t from_channel_id,
                                              godot::PackedStringArray optional_fields );
 
-    godot::Array receive_update( godot::Ref<DatagramIterator> di );
+    void receive_update( godot::Object *dist_obj, godot::Ref<DatagramIterator> di );
+    void receive_update_broadcast_required( godot::Object *dist_obj,
+                                            godot::Ref<DatagramIterator> di );
+    void receive_update_broadcast_required_owner( godot::Object *dist_obj,
+                                                  godot::Ref<DatagramIterator> di );
+    void receive_update_all_required( godot::Object *dist_obj, godot::Ref<DatagramIterator> di );
+    void receive_update_other( godot::Object *dist_obj, godot::Ref<DatagramIterator> di );
 
     bool pack_required_field( DCPacker &packer, godot::Object *dist_obj,
                               const DCField *field ) const;

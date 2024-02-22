@@ -149,10 +149,10 @@ Ref<Datagram> GDDCClass::ai_format_generate( Object *dist_obj, uint32_t do_id, u
 }
 
 /**
- * Extracts the update message out of the packer and packs the individual
- * args into a Godot array to be used in a `Callable`.
+ * Extracts the update message out of the datagram and applies it to the
+ * indicated object by calling the appropriate method.
  */
-Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
+void GDDCClass::receive_update( Object *dist_obj, Ref<DatagramIterator> di )
 {
     DCPacker packer;
 
@@ -167,24 +167,136 @@ Array GDDCClass::receive_update( godot::Ref<DatagramIterator> di )
                      ", not in class " + get_name() )
                        .utf8()
                        .get_data() );
-        return {};
+        return;
     }
-
-    godot::Array updateData;
 
     GDDCField dcField;
     dcField.set_dc_field( field );
 
-    // First arg in receive_update data is the field name.
-    updateData.append( dcField.get_name() );
-
     packer.begin_unpack( field );
-    dcField.receive_update( packer, updateData );
+    dcField.receive_update( dist_obj, packer );
     packer.end_unpack();
 
     di->Skip( packer.get_num_unpacked_bytes() );
+}
 
-    return updateData;
+/**
+ * Processes a big datagram that includes all of the "required" fields that
+ * are sent along with a normal "generate with required" message. This is all
+ * of the atomic fields that are marked "broadcast required".
+ */
+void GDDCClass::receive_update_broadcast_required( Object *dist_obj, Ref<DatagramIterator> di )
+{
+    DCPacker packer;
+
+    const char *data = (const char *)di->GetData()->GetBytes();
+    packer.set_unpack_data( data + di->Tell(), di->GetRemainingSize(), false );
+
+    int num_fields = _dcClass->get_num_inherited_fields();
+    for ( int i = 0; i < num_fields; ++i )
+    {
+        DCField *field = _dcClass->get_inherited_field( i );
+        if ( field->as_molecular_field() == nullptr && field->is_required() &&
+             field->is_broadcast() )
+        {
+            packer.begin_unpack( field );
+
+            GDDCField dcField;
+            dcField.set_dc_field( field );
+            dcField.receive_update( dist_obj, packer );
+
+            if ( !packer.end_unpack() )
+            {
+                break;
+            }
+        }
+    }
+
+    di->Skip( packer.get_num_unpacked_bytes() );
+}
+
+/**
+ * Processes a big datagram that includes all of the "required" fields that
+ * are sent along with a normal "generate with required" message. This is all
+ * of the atomic fields that are marked "broadcast ownrecv". Should be used
+ * for 'owner-view' objects.
+ */
+void GDDCClass::receive_update_broadcast_required_owner( Object *dist_obj,
+                                                         Ref<DatagramIterator> di )
+{
+    DCPacker packer;
+
+    const char *data = (const char *)di->GetData()->GetBytes();
+    packer.set_unpack_data( data + di->Tell(), di->GetRemainingSize(), false );
+
+    int num_fields = _dcClass->get_num_inherited_fields();
+    for ( int i = 0; i < num_fields; ++i )
+    {
+        DCField *field = _dcClass->get_inherited_field( i );
+        if ( field->as_molecular_field() == nullptr && field->is_required() &&
+             ( field->is_ownrecv() || field->is_broadcast() ) )
+        {
+            packer.begin_unpack( field );
+
+            GDDCField dcField;
+            dcField.set_dc_field( field );
+            dcField.receive_update( dist_obj, packer );
+
+            if ( !packer.end_unpack() )
+            {
+                break;
+            }
+        }
+    }
+
+    di->Skip( packer.get_num_unpacked_bytes() );
+}
+
+/**
+ * Processes a big datagram that includes all of the "required" fields that
+ * are sent when an avatar is created. This is all of the atomic fields that
+ * are marked "required", whether they are broadcast or not.
+ */
+void GDDCClass::receive_update_all_required( Object *dist_obj, Ref<DatagramIterator> di )
+{
+    DCPacker packer;
+
+    const char *data = (const char *)di->GetData()->GetBytes();
+    packer.set_unpack_data( data + di->Tell(), di->GetRemainingSize(), false );
+
+    int num_fields = _dcClass->get_num_inherited_fields();
+    for ( int i = 0; i < num_fields; ++i )
+    {
+        DCField *field = _dcClass->get_inherited_field( i );
+        if ( field->as_molecular_field() == nullptr && field->is_required() )
+        {
+            packer.begin_unpack( field );
+
+            GDDCField dcField;
+            dcField.set_dc_field( field );
+            dcField.receive_update( dist_obj, packer );
+
+            if ( !packer.end_unpack() )
+            {
+                break;
+            }
+        }
+    }
+
+    di->Skip( packer.get_num_unpacked_bytes() );
+}
+
+/**
+ * Processes a datagram that lists some additional fields that are broadcast
+ * in one chunk.
+ */
+void GDDCClass::receive_update_other( Object *dist_obj, Ref<DatagramIterator> di )
+{
+    int num_fields = di->GetUint16();
+    for ( int i = 0; i < num_fields; ++i )
+    {
+        receive_update( dist_obj, di );
+    }
 }
 
 /**
@@ -358,5 +470,14 @@ void GDDCClass::_bind_methods()
                                     "optional_fields" ),
                           &GDDCClass::ai_format_generate );
 
-    ClassDB::bind_method( D_METHOD( "receive_update", "di" ), &GDDCClass::receive_update );
+    ClassDB::bind_method( D_METHOD( "receive_update", "dist_obj", "di" ),
+                          &GDDCClass::receive_update );
+    ClassDB::bind_method( D_METHOD( "receive_update_broadcast_required", "dist_obj", "di" ),
+                          &GDDCClass::receive_update_broadcast_required );
+    ClassDB::bind_method( D_METHOD( "receive_update_broadcast_required_owner", "dist_obj", "di" ),
+                          &GDDCClass::receive_update_broadcast_required_owner );
+    ClassDB::bind_method( D_METHOD( "receive_update_all_required", "dist_obj", "di" ),
+                          &GDDCClass::receive_update_all_required );
+    ClassDB::bind_method( D_METHOD( "receive_update_other", "dist_obj", "di" ),
+                          &GDDCClass::receive_update_other );
 }
