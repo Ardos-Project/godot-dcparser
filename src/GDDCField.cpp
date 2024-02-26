@@ -100,12 +100,12 @@ void GDDCField::receive_update( godot::Object *dist_obj, DCPacker &packer ) cons
         if ( !method.is_valid() )
         {
             // If there's no method to receive this message, don't bother
-            // unpacking it to a Python tuple--just skip past the message.
+            // unpacking it, just skip past the message.
             packer.unpack_skip();
         }
         else
         {
-            // Otherwise, get an array from the args and call the Python
+            // Otherwise, get an array from the args and call the Godot
             // method.
             unpack_args( packer, args );
             method.callv( args );
