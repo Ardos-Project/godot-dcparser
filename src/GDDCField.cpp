@@ -87,9 +87,8 @@ void GDDCField::receive_update( godot::Object *dist_obj, DCPacker &packer ) cons
     if ( _dcField->as_parameter() != nullptr )
     {
         // If it's a parameter-type field, just store a new value on the object.
-        // TODO: I'm not sure if this is possible?
-        ERR_PRINT(
-            ( "Unable to set parameter-type fields for field " + get_name() ).utf8().get_data() );
+        unpack_args( packer, args );
+        dist_obj->set( get_name(), args.pop_front() );
     }
     else
     {
@@ -204,29 +203,26 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         case PT_blob:
         {
             // TODO: How do we want to handle this?
-            ERR_PRINT( "Blob packing not yet supported" );
-            break;
-        }
-        case PT_array:
-        {
-            ERR_PRINT( "Array packing not yet supported" );
-            break;
-        }
-        case PT_field:
-        {
-            packer.push();
-            pack_object( packer, args );
-            packer.pop();
+            ERR_PRINT( "Blob packing not yet implemented" );
             break;
         }
         case PT_class:
         {
-            ERR_PRINT( "Class packing not yet supported" );
+            // TODO.
+            ERR_PRINT( "Class packing not yet implemented" );
             break;
         }
+        case PT_array:
+        case PT_field:
         case PT_switch:
         {
-            ERR_PRINT( "Switch packing not yet supported" );
+            packer.push();
+            int64_t size = args.size();
+            for ( int i = 0; i < size; ++i )
+            {
+                pack_object( packer, args );
+            }
+            packer.pop();
             break;
         }
     }
@@ -291,7 +287,8 @@ void GDDCField::unpack_object( DCPacker &packer, godot::Array args ) const
         }
         case PT_class:
         {
-            ERR_PRINT( "Class unpacking not implemented" );
+            // TODO.
+            ERR_PRINT( "Class unpacking not yet implemented" );
             break;
         }
         case PT_array:
