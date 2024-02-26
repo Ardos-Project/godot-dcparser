@@ -9,8 +9,12 @@
 
 #include "DCFileLoader.h"
 #include "DCFileResource.h"
+#include "Datagram.h"
+#include "DatagramIterator.h"
+#include "GDDCField.h"
 #include "GDDCFile.h"
 #include "GDDCParser.h"
+#include "UniqueIdAllocator.h"
 
 static godot::Ref<DCFileLoader> dc_file_loader;
 
@@ -36,8 +40,19 @@ namespace
         dc_file_loader.instantiate();
         godot::ResourceLoader::get_singleton()->add_resource_format_loader( dc_file_loader );
 
+        // Not part of the DC Parser specifically,
+        // but this is a good place for a C++-backed (de)serializer for communicating with Ardos.
+        godot::ClassDB::register_class<Datagram>();
+        godot::ClassDB::register_class<DatagramIterator>();
+        // Utility class for allocating DoId's.
+        // Should be cheaper than doing it in gdscript.
+        godot::ClassDB::register_class<UniqueIdAllocator>();
+
+        // DC Parser classes - most of these are just wrappers.
         godot::ClassDB::register_class<DCFileResource>();
         godot::ClassDB::register_class<GDDCParser>();
+        godot::ClassDB::register_class<GDDCClass>();
+        godot::ClassDB::register_class<GDDCField>();
         godot::ClassDB::register_class<GDDCFile>();
     }
 

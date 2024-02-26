@@ -8,6 +8,16 @@ target_sources( ${PROJECT_NAME}
         DCFileLoader.cpp
         GDDCFile.h
         GDDCFile.cpp
+        GDDCClass.h
+        GDDCClass.cpp
+        GDDCField.h
+        GDDCField.cpp
+        Datagram.h
+        Datagram.cpp
+        DatagramIterator.h
+        DatagramIterator.cpp
+        UniqueIdAllocator.h
+        UniqueIdAllocator.cpp
         RegisterExtension.cpp
 )
 
