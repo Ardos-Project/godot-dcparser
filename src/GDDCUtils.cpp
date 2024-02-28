@@ -4,8 +4,7 @@
 
 using namespace godot;
 
-String GDDCUtils::GetFieldName( Object *obj,
-                                const godot::String &name )
+String GDDCUtils::GetFieldName( Object *obj, const godot::String &name )
 {
     Variant fieldNameType = obj->get( "FIELD_NAME_TYPE" );
     if ( fieldNameType.get_type() == godot::Variant::NIL )
@@ -14,7 +13,7 @@ String GDDCUtils::GetFieldName( Object *obj,
         fieldNameType = GDDCUtils::FIELD_NAME_SNAKE_CASE;
     }
 
-    auto fieldType = static_cast<FieldNameConvention>(fieldNameType.operator int32_t());
+    auto fieldType = static_cast<FieldNameConvention>( fieldNameType.operator int32_t() );
     switch ( fieldType )
     {
         case FIELD_NAME_SNAKE_CASE:

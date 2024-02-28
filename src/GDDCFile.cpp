@@ -33,8 +33,8 @@ GDDCClass *GDDCFile::get_dc_class( int n ) const
 {
     DCClass *dcClass = _dcFile->get_class( n );
 
-    GDDCClass *ret = memnew(GDDCClass);
-    ret->set_dc_class(dcClass);
+    GDDCClass *ret = memnew( GDDCClass );
+    ret->set_dc_class( dcClass );
 
     return ret;
 }
