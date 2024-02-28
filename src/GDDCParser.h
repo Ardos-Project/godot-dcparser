@@ -3,15 +3,9 @@
 
 #include "godot_cpp/classes/object.hpp"
 
-namespace godot
-{
-    class ClassDB;
-}
-
 class GDDCParser : public godot::Object
 {
     GDCLASS( GDDCParser, godot::Object )
-
 public:
     static godot::String version();
     static godot::String godotCPPVersion();

@@ -5,6 +5,8 @@
 #include "dclass/dcPacker.h"
 #include "dclass/dcmsgtypes.h"
 
+#include "GDDCUtils.h"
+
 using namespace godot;
 
 void GDDCField::set_dc_field( DCField *dcField )
@@ -88,14 +90,13 @@ void GDDCField::receive_update( godot::Object *dist_obj, DCPacker &packer ) cons
     {
         // If it's a parameter-type field, just store a new value on the object.
         unpack_args( packer, args );
-        dist_obj->set( get_name(), args.pop_front() );
+        dist_obj->set( GDDCUtils::GetFieldName( dist_obj, get_name() ), args.pop_front() );
     }
     else
     {
         // Otherwise, it must be an atomic or molecular field, so call the
         // corresponding method.
-        Callable method( dist_obj, get_name() );
-
+        Callable method( dist_obj, GDDCUtils::GetFieldName( dist_obj, get_name() ) );
         if ( !method.is_valid() )
         {
             // If there's no method to receive this message, don't bother

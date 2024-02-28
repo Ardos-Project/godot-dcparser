@@ -14,6 +14,7 @@
 #include "GDDCField.h"
 #include "GDDCFile.h"
 #include "GDDCParser.h"
+#include "GDDCUtils.h"
 #include "UniqueIdAllocator.h"
 
 static godot::Ref<DCFileLoader> dc_file_loader;
@@ -54,6 +55,7 @@ namespace
         godot::ClassDB::register_class<GDDCClass>();
         godot::ClassDB::register_class<GDDCField>();
         godot::ClassDB::register_class<GDDCFile>();
+        godot::ClassDB::register_class<GDDCUtils>();
     }
 
     /// @brief Called by Godot to let us do any cleanup.

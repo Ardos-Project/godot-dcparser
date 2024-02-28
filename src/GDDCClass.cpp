@@ -7,6 +7,7 @@
 #include "dclass/dcmsgtypes.h"
 
 #include "GDDCField.h"
+#include "GDDCUtils.h"
 
 using namespace godot;
 
@@ -313,13 +314,12 @@ bool GDDCClass::pack_required_field( DCPacker &packer, godot::Object *dist_obj,
     const DCParameter *parameter = field->as_parameter();
     if ( parameter != nullptr )
     {
+        String field_name( field->get_name().c_str() );
+
         // This is the easy case: to pack a parameter, we just look on the class
         // object for the data element.
-        std::string field_name = field->get_name();
-
-        Callable method( dist_obj, StringName( field_name.c_str() ) );
-
-        if ( !method.is_valid() )
+        Variant result = dist_obj->get( GDDCUtils::GetFieldName( dist_obj, field_name ) );
+        if ( result.get_type() == godot::Variant::NIL )
         {
             // If the attribute is not defined, but the field has a default value
             // specified, quietly pack the default value.
@@ -330,15 +330,12 @@ bool GDDCClass::pack_required_field( DCPacker &packer, godot::Object *dist_obj,
             }
 
             // If there is no default value specified, it's an error.
-            ERR_PRINT( ( "Data element " + String( field_name.c_str() ) +
-                         ", required by dc file for dclass " + get_name() +
-                         ", not defined on object" )
+            ERR_PRINT( ( "Data element " + field_name + ", required by dc file for dclass " +
+                         get_name() + ", not defined on object" )
                            .utf8()
                            .get_data() );
             return false;
         }
-
-        Variant result = method.call();
 
         Array arr;
         arr.append( result );
@@ -390,11 +387,12 @@ bool GDDCClass::pack_required_field( DCPacker &packer, godot::Object *dist_obj,
     }
     else
     {
-        // Otherwise, we add a "get_" prefix.
-        getter_name = "get_" + setter_name;
+        // Otherwise, we add a "get" prefix, and capitalize the next letter.
+        getter_name = "get" + setter_name;
+        getter_name[3] = toupper( getter_name[3] );
     }
 
-    Callable method( dist_obj, StringName( getter_name.c_str() ) );
+    Callable method( dist_obj, GDDCUtils::GetFieldName( dist_obj, String( getter_name.c_str() ) ) );
 
     // Now we have to look up the getter on the distributed object and call it.
     if ( !method.is_valid() )
