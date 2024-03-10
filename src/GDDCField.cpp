@@ -144,7 +144,7 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         case PT_int64:
         {
             Variant arg = args.pop_front();
-            if ( arg.get_type() == godot::Variant::INT )
+            if ( arg.get_type() == godot::Variant::INT || arg.get_type() == godot::Variant::BOOL )
             {
                 packer.pack_int64( arg.operator int64_t() );
                 return;
@@ -154,7 +154,7 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         case PT_uint64:
         {
             Variant arg = args.pop_front();
-            if ( arg.get_type() == godot::Variant::INT )
+            if ( arg.get_type() == godot::Variant::INT || arg.get_type() == godot::Variant::BOOL )
             {
                 packer.pack_uint64( arg.operator uint64_t() );
                 return;
@@ -164,7 +164,7 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         case PT_int:
         {
             Variant arg = args.pop_front();
-            if ( arg.get_type() == godot::Variant::INT )
+            if ( arg.get_type() == godot::Variant::INT || arg.get_type() == godot::Variant::BOOL )
             {
                 packer.pack_int( arg.operator int32_t() );
                 return;
@@ -174,7 +174,7 @@ void GDDCField::pack_object( DCPacker &packer, godot::Array args ) const
         case PT_uint:
         {
             Variant arg = args.pop_front();
-            if ( arg.get_type() == godot::Variant::INT )
+            if ( arg.get_type() == godot::Variant::INT || arg.get_type() == godot::Variant::BOOL )
             {
                 packer.pack_uint( arg.operator uint32_t() );
                 return;
